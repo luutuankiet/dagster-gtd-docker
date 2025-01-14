@@ -90,6 +90,27 @@ services:
   # Multiple containers like this can be deployed separately - each just needs to run on
   # its own port, and have its own entry in the workspace.yaml file that's loaded by the
       # webserver.
+  dagster_gtd_user_code_dev:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_gtd_user_code_dev
+    container_name: dagster_gtd_usercode_dev
+    image: dagster_gtd_usercode_dev_image
+    # restart: always
+    restart: unless-stopped
+    volumes:
+      - /home/ken/dev/dagster-docker/scrape-ticktick:/opt/dagster/scrape-ticktick
+    environment:
+      DAGSTER_POSTGRES_USER: "postgres_user"
+      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
+      DAGSTER_POSTGRES_DB: "postgres_db"
+      DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
+      DBT_PROJECT_DIR: "/opt/dagster/gtd_ETL/dbt_project"
+      DBT_PROFILES_DIR: "/opt/dagster/gtd_ETL/dbt_project"
+      PYTHONPATH: "/opt/dagster/gtd_ETL/app"
+    networks:
+      - dell_dagster_network
+
   dagster_gtd_user_code:
     build:
       context: .
