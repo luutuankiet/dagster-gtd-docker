@@ -2,10 +2,28 @@ version: "3.7"
 
 services:
 
+  # This service runs the postgres DB used by dagster for run storage, schedule storage,
+  # and event log storage. Depending on the hardware you run this Compose on, you may be able
+  # to reduce the interval and timeout in the healthcheck to speed up your `docker-compose up` times.
+  dagster_postgresql:
+    image: postgres:11
+    container_name: dagster_postgresql
+    environment:
+      POSTGRES_USER: "postgres_user"
+      POSTGRES_PASSWORD: "postgres_password"
+      POSTGRES_DB: "postgres_db"
+    networks:
+      - dell_dagster_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_db"]
+      interval: 10s
+      timeout: 8s
+      retries: 5
+
   # This service runs dagster-webserver, which loads your user code from the user code container.
   # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
   # a queue and later dequeued and launched by dagster-daemon.
-  docker_example_webserver:
+  dagster_webserver:
     build:
       context: .
       dockerfile: ./Dockerfile_dagster
@@ -17,11 +35,11 @@ services:
       - "3000"
       - -w
       - workspace.yaml
-    container_name: docker_example_webserver
+    container_name: dagster_webserver
     expose:
       - "3000"
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
@@ -32,22 +50,24 @@ services:
     networks:
       - dell_dagster_network
     depends_on:
-      docker_example_postgresql:
+      dagster_postgresql:
         condition: service_healthy
-      docker_example_user_code:
+      dagster_gtd_user_code:
         condition: service_started
+    restart: unless-stopped
 
   # This service runs the dagster-daemon process, which is responsible for taking runs
   # off of the queue and launching them, as well as creating runs from schedules or sensors.
-  docker_example_daemon:
+  dagster_daemon:
     build:
       context: .
       dockerfile: ./Dockerfile_dagster
     entrypoint:
       - dagster-daemon
       - run
-    container_name: docker_example_daemon
-    restart: on-failure
+    container_name: dagster_daemon
+    # restart: on-failure
+    restart: unless-stopped
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
@@ -58,9 +78,9 @@ services:
     networks:
       - dell_dagster_network
     depends_on:
-      docker_example_postgresql:
+      dagster_postgresql:
         condition: service_healthy
-      docker_example_user_code:
+      dagster_gtd_user_code:
         condition: service_started
 
 
@@ -70,18 +90,24 @@ services:
   # Multiple containers like this can be deployed separately - each just needs to run on
   # its own port, and have its own entry in the workspace.yaml file that's loaded by the
       # webserver.
-  docker_example_user_code:
+  dagster_gtd_user_code:
     build:
       context: .
-      dockerfile: ./Dockerfile_user_code
-    container_name: docker_example_user_code
-    image: docker_example_user_code_image
-    restart: always
+      dockerfile: ./Dockerfile_gtd_user_code
+    container_name: dagster_gtd_usercode
+    image: dagster_gtd_usercode_image
+    # restart: always
+    restart: unless-stopped
+    volumes:
+      - /home/ken/dev/ETL/gtd_ETL:/opt/dagster/gtd_ETL
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
-      DAGSTER_CURRENT_IMAGE: "docker_example_user_code_image"
+      DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
+      DBT_PROJECT_DIR: "/opt/dagster/gtd_ETL/dbt_project"
+      DBT_PROFILES_DIR: "/opt/dagster/gtd_ETL/dbt_project"
+      PYTHONPATH: "/opt/dagster/gtd_ETL/app"
     networks:
       - dell_dagster_network
 

@@ -13,26 +13,26 @@ run_coordinator:
         value: "example"
         limit: 5
 
-run_launcher:
-  module: dagster_docker
-  class: DockerRunLauncher
-  config:
-    env_vars:
-      - DAGSTER_POSTGRES_USER
-      - DAGSTER_POSTGRES_PASSWORD
-      - DAGSTER_POSTGRES_DB
-    network: docker_example_network
-    container_kwargs:
-      volumes: # Make docker client accessible to any launched containers as well
-        - /var/run/docker.sock:/var/run/docker.sock
-        - /tmp/io_manager_storage:/tmp/io_manager_storage
+# run_launcher:
+#   module: dagster_docker
+#   class: DockerRunLauncher
+#   config:
+#     env_vars:
+#       - DAGSTER_POSTGRES_USER
+#       - DAGSTER_POSTGRES_PASSWORD
+#       - DAGSTER_POSTGRES_DB
+#     network: dell_dagster_network
+#     container_kwargs:
+#       volumes: # Make docker client accessible to any launched containers as well
+#         - /var/run/docker.sock:/var/run/docker.sock
+#         - /tmp/io_manager_storage:/tmp/io_manager_storage
 
 run_storage:
   module: dagster_postgres.run_storage
   class: PostgresRunStorage
   config:
     postgres_db:
-      hostname: docker_example_postgresql
+      hostname: dagster_postgresql
       username:
         env: DAGSTER_POSTGRES_USER
       password:
@@ -46,7 +46,7 @@ schedule_storage:
   class: PostgresScheduleStorage
   config:
     postgres_db:
-      hostname: docker_example_postgresql
+      hostname: dagster_postgresql
       username:
         env: DAGSTER_POSTGRES_USER
       password:
@@ -60,7 +60,7 @@ event_log_storage:
   class: PostgresEventLogStorage
   config:
     postgres_db:
-      hostname: docker_example_postgresql
+      hostname: dagster_postgresql
       username:
         env: DAGSTER_POSTGRES_USER
       password:
