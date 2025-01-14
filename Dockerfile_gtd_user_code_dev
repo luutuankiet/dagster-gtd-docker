@@ -17,11 +17,9 @@ WORKDIR /opt/dagster/app
 
 EXPOSE 4000
 
-# reqs
 RUN apt-get update && apt-get install -y git build-essential
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-WORKDIR /opt/dagster/gtd_ETL/app
-# CMD ["dagster", "api", "grpc", "-h", "0.0.0.0", "-p", "4000", "-m", "ETL"]
-CMD ["sleep", "infinity"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

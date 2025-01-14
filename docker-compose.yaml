@@ -99,7 +99,7 @@ services:
     # restart: always
     restart: unless-stopped
     volumes:
-      - /home/ken/dev/dagster-docker/scrape-ticktick:/opt/dagster/scrape-ticktick
+      - "./scrape-ticktick:/opt/dagster/app"
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
@@ -110,6 +110,9 @@ services:
       PYTHONPATH: "/opt/dagster/gtd_ETL/app"
     networks:
       - dell_dagster_network
+    # command: ["dagster", "api", "grpc", "-h", "0.0.0.0", "-p", "4000", "-m", "ETL"]
+    command: ["sleep", "infinity"]
+
 
   dagster_gtd_user_code:
     build:
