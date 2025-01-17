@@ -19,6 +19,7 @@ services:
       interval: 10s
       timeout: 8s
       retries: 5
+    restart: unless-stopped
 
   # This service runs dagster-webserver, which loads your user code from the user code container.
   # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
@@ -105,13 +106,17 @@ services:
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
       DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
-      DBT_PROJECT_DIR: "/opt/dagster/gtd_ETL/dbt_project"
-      DBT_PROFILES_DIR: "/opt/dagster/gtd_ETL/dbt_project"
-      PYTHONPATH: "/opt/dagster/gtd_ETL/app"
+      PYTHONPATH: "/opt/dagster/app/app"
+      DAGSTER_DBT_PARSE_PROJECT_ON_LOAD: 1
     networks:
       - dell_dagster_network
-    # command: ["dagster", "api", "grpc", "-h", "0.0.0.0", "-p", "4000", "-m", "ETL"]
-    command: ["sleep", "infinity"]
+    ports:
+      - "5678:5678"
+    command: [
+      "python", 
+      "-m", "debugpy", "--listen", "0.0.0.0:5678",
+      "-m", "dagster", "api", "grpc", "-h", "0.0.0.0", "-p", "4000", "-m", "ETL"]
+    # command: ["sleep", "infinity"]
 
 
   dagster_gtd_user_code:

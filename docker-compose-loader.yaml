@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  
+  dagster_gtd_user_code_dev:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_gtd_user_code_dev
+    container_name: dagster_gtd_loader
+    image: dagster_gtd_usercode_dev_image
+    # restart: always
+    restart: unless-stopped
+    volumes:
+      - "./scrape-ticktick:/opt/dagster/app"
+    environment:
+      PYTHONPATH: "/opt/dagster/app/app"
+    command: ["/bin/sh", "-c", "cd app/ETL && python loader.py"]
+  
