@@ -115,7 +115,7 @@ services:
     command: [
       "python", 
       "-m", "debugpy", "--listen", "0.0.0.0:5678",
-      "-m", "dagster", "api", "grpc", "-h", "0.0.0.0", "-p", "4000", "-m", "ETL"]
+      "-m", "dagster", "api", "grpc", "-h", "0.0.0.0", "-p", "4001", "-m", "ETL"]
     # command: ["sleep", "infinity"]
 
 
@@ -128,17 +128,19 @@ services:
     # restart: always
     restart: unless-stopped
     volumes:
-      - /home/ken/dev/ETL/gtd_ETL:/opt/dagster/gtd_ETL
+      - "./scrape-ticktick:/opt/dagster/app"
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
       DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
-      DBT_PROJECT_DIR: "/opt/dagster/gtd_ETL/dbt_project"
-      DBT_PROFILES_DIR: "/opt/dagster/gtd_ETL/dbt_project"
-      PYTHONPATH: "/opt/dagster/gtd_ETL/app"
+      PYTHONPATH: "/opt/dagster/app/app"
+      DAGSTER_DBT_PARSE_PROJECT_ON_LOAD: 1
     networks:
       - dell_dagster_network
+    command: [
+      "python", 
+      "-m", "dagster", "api", "grpc", "-h", "0.0.0.0", "-p", "4000", "-m", "ETL"]
 
 
 networks:
