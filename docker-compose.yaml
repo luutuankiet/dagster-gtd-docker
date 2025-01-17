@@ -53,7 +53,9 @@ services:
     depends_on:
       dagster_postgresql:
         condition: service_healthy
-      dagster_gtd_user_code:
+      dagster_gtd_user_code_dev:
+        condition: service_started
+      dagster_gtd_user_code_prod:
         condition: service_started
     restart: unless-stopped
 
@@ -81,7 +83,9 @@ services:
     depends_on:
       dagster_postgresql:
         condition: service_healthy
-      dagster_gtd_user_code:
+      dagster_gtd_user_code_dev:
+        condition: service_started
+      dagster_gtd_user_code_prod:
         condition: service_started
 
 
@@ -94,22 +98,23 @@ services:
   dagster_gtd_user_code_dev:
     build:
       context: .
-      dockerfile: ./Dockerfile_gtd_user_code_dev
+      dockerfile: ./Dockerfile_gtd_user_code
     container_name: dagster_gtd_usercode_dev
-    image: dagster_gtd_usercode_dev_image
+    image: dagster_gtd_usercode_image
     # restart: always
     restart: unless-stopped
     volumes:
-      - "./scrape-ticktick:/opt/dagster/app"
+      - "./user_code/dev/scrape-ticktick:/opt/dagster/app"
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
       DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
       PYTHONPATH: "/opt/dagster/app/app"
-      DAGSTER_DBT_PARSE_PROJECT_ON_LOAD: 1
     networks:
       - dell_dagster_network
+    expose:
+      - 4001
     ports:
       - "5678:5678"
     command: [
@@ -119,23 +124,24 @@ services:
     # command: ["sleep", "infinity"]
 
 
-  dagster_gtd_user_code:
+  dagster_gtd_user_code_prod:
     build:
       context: .
       dockerfile: ./Dockerfile_gtd_user_code
-    container_name: dagster_gtd_usercode
+    container_name: dagster_gtd_usercode_prod
     image: dagster_gtd_usercode_image
     # restart: always
     restart: unless-stopped
+    expose:
+      - 4000
     volumes:
-      - "./scrape-ticktick:/opt/dagster/app"
+      - "./user_code/prod/scrape-ticktick:/opt/dagster/app"
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
       DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
       PYTHONPATH: "/opt/dagster/app/app"
-      DAGSTER_DBT_PARSE_PROJECT_ON_LOAD: 1
     networks:
       - dell_dagster_network
     command: [

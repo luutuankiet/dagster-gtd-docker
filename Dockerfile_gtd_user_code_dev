@@ -14,8 +14,6 @@ RUN pip install --no-cache-dir \
 WORKDIR /opt/dagster/app
 
 
-# Run dagster gRPC server on port 4000
-
 EXPOSE 4001
 
 RUN apt-get update && apt-get install -y --no-install-recommends git build-essential &&\

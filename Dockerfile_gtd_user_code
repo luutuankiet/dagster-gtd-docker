@@ -6,16 +6,14 @@ FROM python:3.11.11-slim
 RUN pip install --no-cache-dir \
     dagster \
     dagster-postgres \
-    dagster-docker
+    dagster-docker \
+    debugpy
 
 # Add repository code
 
 WORKDIR /opt/dagster/app
 
 
-# Run dagster gRPC server on port 4000
-
-EXPOSE 4000
 
 RUN apt-get update && apt-get install -y --no-install-recommends git build-essential &&\
     apt-get clean &&\ 
