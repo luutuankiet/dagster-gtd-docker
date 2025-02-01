@@ -1,3 +1,4 @@
 .env
 scrape-ticktick
 project_fully_featured
+.venv
