@@ -105,6 +105,8 @@ services:
     restart: unless-stopped
     volumes:
       - "./user_code/dev/scrape-ticktick:/opt/dagster/app"
+      - "./dagster.yaml:/opt/dagster/dagster.yaml"
+      - "./workspace.yaml:/opt/dagster/workspace.yaml" 
       - "${HOME}/.vscode-server/extensions:/root/.vscode-server/extensions"
       - "${HOME}/.gitconfig:/root/.gitconfig"
     environment:
@@ -112,6 +114,8 @@ services:
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
       DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
+      DAGSTER_CODE_LOCATION_NAME: "gtd_dev"
+      DAGSTER_HOME: "/opt/dagster/"
       PYTHONPATH: "/opt/dagster/app/app"
     networks:
       - dell_dagster_network
@@ -138,6 +142,8 @@ services:
       - 4000
     volumes:
       - "./user_code/prod/scrape-ticktick:/opt/dagster/app"
+      - "./dagster.yaml:/opt/dagster/dagster.yaml"
+      - "./workspace.yaml:/opt/dagster/workspace.yaml"
       - "${HOME}/.vscode-server/extensions:/root/.vscode-server/extensions"
       - "${HOME}/.gitconfig:/root/.gitconfig"
     environment:
@@ -145,6 +151,8 @@ services:
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
       DAGSTER_CURRENT_IMAGE: "dagster_gtd_usercode_image"
+      DAGSTER_CODE_LOCATION_NAME: "gtd_prod"
+      DAGSTER_HOME: "/opt/dagster/"
       PYTHONPATH: "/opt/dagster/app/app"
     networks:
       - dell_dagster_network
